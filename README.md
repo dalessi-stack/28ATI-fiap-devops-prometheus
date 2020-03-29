@@ -36,10 +36,10 @@ cp /tmp/prometheus.yml $(pwd)
 ![](img/qry1.png)
 19. Vamos deixar o resultado dessa query mais facil de ser lido mudando a sintaxe para `sum without(cpu, mode) (rate(node_cpu_seconds_total{mode!="idle"}[5m]))` . Agora estamos fazendo uma soma sem as dimensões cpu e mode, apenas nó, e filtrando o mode para não trazer nada com "idle".
 ![](img/qry2.png)
-20. De volta a sua maquina virtual local, entre na pasta terraform e edite o arquivo 'main.tf' alterando o count dos workers para 4.
+20. De volta a sua maquina do cloud9 (digite o comando `exit` na maquina manager que fez ssh), entre na pasta terraform e edite o arquivo 'main.tf' alterando o count dos workers para 4.
 ![](img/countedit.png)
 21. Execute o comando `terraform apply --auto-approve`
-22. Ao final você terá adicionado 3 maquina no seu cluster. E ficará como na imagem abaixo quando entrar novamente no manager e executar o comando `docker node ls`.
+22. Ao final você terá adicionado 3 maquina no seu cluster. E ficará como na imagem abaixo quando entrar novamente no manager como no passo 7 e executar o comando `docker node ls`.
 ![](img/nodels2.png)
 23. Como utilizamos a tag 'Global' em nosso compose. Os serviços de monitoramento também foram distribuidos para as novas maquinas assim que entraram no cluster. Note que os valores de REPLICAS do comando `docker service ls` mudaram.
 ![](img/servicels3.png)
@@ -66,7 +66,7 @@ Você pode navegar pelos nós e ver como esta a performance deles individualment
 ![](img/dashedit1.png)
 36. Note que a query esta utilizando as variáveis dos filtros do dashboard. ($node,$port,$job)
 37. Expore o grafana e o Prometheus o quanto desejar.
-38. Para destruir toda a stack utilize o comando `terraform destroy --auto-approve` na maquina virtual local.
+38. Para destruir toda a stack utilize o comando `terraform destroy --auto-approve` na maquina do cloud9.
 
 
 
