@@ -1,16 +1,18 @@
-1. Com a VPC, subnets e rotas utilizadas em aula provisionadas, entre na pasta terraform.
-2. Se certifique no arquivo 'main.tf'que o count de workers esta com o valor '1'
-3. Execute os comandos `terraform init` e `terraform apply --auto-approve`
-4. Note que esse comando via montar um cluster swarm com um Manager e um Worker, além de colocar os aquivos necessários para o exercicio no Manager.
-5. Utilize o DNS do manager da saida do terraform para acessar a maquina via SSH, como comando `ssh -i "fiap-18cld.pem" ubuntu@DNS.manager` de dentro da sua maquina virtual
+1. Baixe o repositório no cloud9 com o comando `git clone https://github.com/vamperst/28ATI-fiap-devops-prometheus.git`
+2. Execute o comando `cd ~/environment/28ATI-fiap-devops-prometheus/` para entrar na pasta da demo.
+3. Com a VPC, subnets e rotas utilizadas em aula provisionadas, entre na pasta terraform. `cd terraform`
+4. Se certifique pelo IDE no arquivo 'main.tf'que o count de workers esta com o valor '1'
+5. Execute os comandos `terraform init` e `terraform apply --auto-approve`
+6. Note que esse comando via montar um cluster swarm com um Manager e um Worker, além de colocar os aquivos necessários para o exercicio no Manager.
+7. Utilize o DNS do manager da saida do terraform para acessar a maquina via SSH, como comando `ssh -i "~/.ssh/fiap-lab.pem" ubuntu@DNS.manager` de dentro da sua maquina virtual
    ![](img/primeiroApply.png)
-6. Ao entrar na maquina execute o comando `docker node ls` e verá que tem um cluster com 2 maquinas.
+8. Ao entrar na maquina execute o comando `docker node ls` e verá que tem um cluster com 2 maquinas.
    ![](img/nodels1.png)
-7. Primeiro vamos montar um registry local para distribuir as imagens pelo cluster. Para tal, execute o comando `docker service create --name registry --publish 5000:5000 registry:2`
+9. Primeiro vamos montar um registry local para distribuir as imagens pelo cluster. Para tal, execute o comando `docker service create --name registry --publish 5000:5000 registry:2`
 ![](img/registrycreation.png)
 8. Para garantir que o serviço esta rodando no cluster execute o comando `docker service ls`. O campo REPLICAS tem que estar com o valor '1/1'
 ![](img/servicels1.png)   
-9. Agora vamos preparar o ambiante para montar a imagem do prometheus que vamos utilizar no exercácio. Vamos copiar os arquivos do exercicio para a pasta principal
+9. Agora vamos preparar o ambiente para montar a imagem do prometheus que vamos utilizar no exercício. Vamos copiar os arquivos do exercicio para a pasta principal
 ``` $bash
 cp /tmp/Dockerfile $(pwd) 
 cp /tmp/compose.yml $(pwd)
@@ -32,12 +34,12 @@ cp /tmp/prometheus.yml $(pwd)
 17. No menu superior clique em 'Graph'
 18. Digite `rate(node_cpu_seconds_total[5m])` no campo de query e execute. Essa query lhe dará a utilização de cpu por nó e tipo nos ultimos 5 minutos.
 ![](img/qry1.png)
-19. Vamos deixar essa query mais facil de ser lida mudando a sintaxe para `sum without(cpu, mode) (rate(node_cpu_seconds_total{mode!="idle"}[5m]))` . Agora estamos fazendo uma soma sem as dimensões cpu e mode, apenas nó, e filtrando o mode para não trazer nada com "idle".
+19. Vamos deixar o resultado dessa query mais facil de ser lido mudando a sintaxe para `sum without(cpu, mode) (rate(node_cpu_seconds_total{mode!="idle"}[5m]))` . Agora estamos fazendo uma soma sem as dimensões cpu e mode, apenas nó, e filtrando o mode para não trazer nada com "idle".
 ![](img/qry2.png)
 20. De volta a sua maquina virtual local, entre na pasta terraform e edite o arquivo 'main.tf' alterando o count dos workers para 4.
 ![](img/countedit.png)
 21. Execute o comando `terraform apply --auto-approve`
-22. Ao final você terá adicionado 3 maquina no seu cluster. E ficará como na imagem abaixo.
+22. Ao final você terá adicionado 3 maquina no seu cluster. E ficará como na imagem abaixo quando entrar novamente no manager e executar o comando `docker node ls`.
 ![](img/nodels2.png)
 23. Como utilizamos a tag 'Global' em nosso compose. Os serviços de monitoramento também foram distribuidos para as novas maquinas assim que entraram no cluster. Note que os valores de REPLICAS do comando `docker service ls` mudaram.
 ![](img/servicels3.png)

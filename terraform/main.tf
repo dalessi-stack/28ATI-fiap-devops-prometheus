@@ -4,11 +4,11 @@ provider "aws" {
 }
 
 variable "project" {
-  default = "18cld"
+  default = "fiap-lab"
 }
 
 data "aws_vpc" "vpc" {
-  tags {
+  tags = {
     Name = "${var.project}"
   }
 }
@@ -16,18 +16,18 @@ data "aws_vpc" "vpc" {
 data "aws_subnet_ids" "all" {
   vpc_id = "${data.aws_vpc.vpc.id}"
 
-  tags {
+  tags = {
     Tier = "Public"
   }
 }
 
 data "aws_subnet" "public" {
-  count = "${length(data.aws_subnet_ids.all.ids)}"
-  id    = "${data.aws_subnet_ids.all.ids[count.index]}"
+  for_each = data.aws_subnet_ids.all.ids
+  id = "${each.value}"
 }
 
 resource "random_shuffle" "random_subnet" {
-  input        = ["${data.aws_subnet.public.*.id}"]
+  input        = [for s in data.aws_subnet.public : s.id]
   result_count = 1
 }
 
@@ -83,9 +83,10 @@ resource "aws_instance" "managers" {
   connection {
     user        = "${var.INSTANCE_USERNAME}"
     private_key = "${file("${var.PATH_TO_KEY}")}"
+    host = "${self.public_dns}"
   }
 
-  tags {
+  tags = {
     Name = "${format("manager-%03d", count.index + 1)}"
   }
 }
@@ -94,7 +95,7 @@ resource "aws_instance" "workers" {
   instance_type = "t2.micro"
   ami           = "${lookup(var.aws_amis, var.aws_region)}"
 
-  count = 4
+  count = 1
 
   subnet_id              = "${random_shuffle.random_subnet.result[0]}"
   vpc_security_group_ids = ["${aws_security_group.allow-internal-swarm.id}"]
@@ -121,9 +122,10 @@ resource "aws_instance" "workers" {
   connection {
     user        = "${var.INSTANCE_USERNAME}"
     private_key = "${file("${var.PATH_TO_KEY}")}"
+    host = "${self.public_dns}"
   }
 
-  tags {
+  tags = {
     Name = "${format("worker-%03d", count.index + 1)}"
   }
 

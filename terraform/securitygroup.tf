@@ -43,7 +43,7 @@ resource "aws_security_group" "allow-internal-swarm" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   
-  tags {
+  tags = {
     Name = "allow-internal-swarm"
   }
 
